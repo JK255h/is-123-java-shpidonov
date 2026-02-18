@@ -20,10 +20,10 @@ public class UserService {
 
     public void registerUser(String username, String email, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new IllegalArgumentException("Имя пользователя уже занято");
         }
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("Email уже зарегистрирован");
         }
 
         User user = new User();

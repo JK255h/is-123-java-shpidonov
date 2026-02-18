@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Создать новый опрос</h2>
+            <form th:action="@{/forms/create}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Название опроса</label>
+                    <input type="text" name="title" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Описание (необязательно)</label>
+                    <textarea name="description" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать опрос</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container">
+    <h2>Мои опросы</h2>
+    <div th:if="${forms == null or forms.empty}" class="alert alert-info">У вас еще нет опросов.</div>
+    <div class="row">
+        <div class="col-md-4 mb-3" th:each="form : ${forms}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${form.title}">Название</h5>
+                    <p class="card-text" th:text="${form.description}">Описание</p>
+                    <a th:href="@{'/forms/' + ${form.formId}}" class="btn btn-info">Просмотр</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a th:href="@{/forms/create}" class="btn btn-success mt-3">Создать новый</a>
+</div>
+</body>
+</html>

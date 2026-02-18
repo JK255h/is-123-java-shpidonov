@@ -33,7 +33,12 @@ public class AuthController {
                                @RequestParam String confirmPassword,
                                Model model) {
         if (!password.equals(confirmPassword)) {
-            model.addAttribute("error", "Passwords do not match");
+            model.addAttribute("error", "Пароли не совпадают");
+            return "auth/register";
+        }
+
+        if (password.length() < 6) {
+            model.addAttribute("error", "Пароль должен быть не менее 6 символов");
             return "auth/register";
         }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments :: header-css}"></head>
 <body>
 <div th:replace="~{fragments :: navbar}"></div>
@@ -8,8 +8,14 @@
     <p class="lead">Создавайте опросы, собирайте данные и анализируйте результаты.</p>
     <hr class="my-4">
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <a th:href="@{/forms/create}" class="btn btn-primary btn-lg px-4 gap-3">Создать опрос</a>
-        <a th:href="@{/login}" class="btn btn-outline-secondary btn-lg px-4">Войти в кабинет</a>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/forms/create}" class="btn btn-primary btn-lg px-4 gap-3">Создать опрос</a>
+            <a th:href="@{/forms}" class="btn btn-outline-secondary btn-lg px-4">Мои опросы</a>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" class="btn btn-primary btn-lg px-4 gap-3">Войти</a>
+            <a th:href="@{/register}" class="btn btn-outline-secondary btn-lg px-4">Регистрация</a>
+        </div>
     </div>
 </div>
 </body>

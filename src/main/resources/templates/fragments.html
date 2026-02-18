@@ -12,6 +12,9 @@
         <div class="container">
             <a class="navbar-brand" th:href="@{/}">SurveySystem</a>
             <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" sec:authorize="isAuthenticated()">
+                    Привет, <span sec:authentication="name">User</span>!
+                </span>
                 <a class="nav-link" th:href="@{/forms}" sec:authorize="isAuthenticated()">Мои опросы</a>
                 <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()">Вход</a>
                 <a class="nav-link" th:href="@{/register}" sec:authorize="isAnonymous()">Регистрация</a>
