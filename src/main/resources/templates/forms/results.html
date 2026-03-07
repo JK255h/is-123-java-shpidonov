@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/forms}">Мои опросы</a></li>
+            <li class="breadcrumb-item"><a th:href="@{'/forms/' + ${form.formId}}" th:text="${form.title}">Название</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Результаты</li>
+        </ol>
+    </nav>
+
+    <div class="mb-5">
+        <h2 th:text="'Результаты опроса: ' + ${form.title}">Результаты</h2>
+        <p class="text-muted">Всего ответов: <span th:text="${responsesCount}" class="fw-bold">0</span></p>
+    </div>
+
+    <div th:if="${responsesCount == 0}" class="alert alert-info">
+        Пока никто не прошел этот опрос.
+    </div>
+
+    <div th:each="question, iter : ${questions}" class="card mb-4 shadow-sm" th:if="${responsesCount > 0}">
+        <div class="card-header bg-white">
+            <h5 class="mb-0" th:text="${(iter.index + 1) + '. ' + question.title}">Вопрос</h5>
+        </div>
+        <div class="card-body">
+            <!-- For Choice/Checkbox Questions -->
+            <div th:if="${question.questionType == 'MULTIPLE_CHOICE' || question.questionType == 'CHECKBOX'}" class="row">
+                <div class="col-md-6">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Вариант</th>
+                                <th>Кол-во</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${stats.get(question.questionId)}">
+                                <td th:text="${entry.key}">Вариант</td>
+                                <td th:text="${entry.value}">0</td>
+                                <td th:text="${responsesCount > 0 ? (entry.value * 100 / responsesCount) + '%' : '0%'}">0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <canvas th:id="'chart-' + ${question.questionId}" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+
+            <!-- For Scale Question -->
+            <div th:if="${question.questionType == 'SCALE'}">
+                <canvas th:id="'chart-' + ${question.questionId}" style="max-height: 250px;"></canvas>
+            </div>
+
+            <!-- For Text Questions -->
+            <div th:if="${question.questionType == 'TEXT'}">
+                <p class="text-muted small">Список ответов:</p>
+                <ul class="list-group list-group-flush">
+                    <!-- Need to pass actual text answers if we want them here -->
+                    <li class="list-group-item">... (см. экспорт для полного списка)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const stats = /*[[${stats}]]*/ {};
+    const questions = /*[[${questions}]]*/ [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        questions.forEach(q => {
+            const qStats = stats[q.questionId];
+            if (!qStats) return;
+
+            const ctx = document.getElementById('chart-' + q.questionId);
+            if (!ctx) return;
+
+            const labels = Object.keys(qStats);
+            const data = Object.values(qStats);
+
+            if (q.questionType === 'MULTIPLE_CHOICE' || q.questionType === 'CHECKBOX') {
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'right' }
+                        }
+                    }
+                });
+            } else if (q.questionType === 'SCALE') {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels.sort((a, b) => parseInt(a) - parseInt(b)),
+                        datasets: [{
+                            label: 'Кол-во оценок',
+                            data: labels.map(l => qStats[l]),
+                            backgroundColor: '#36A2EB'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }
+                });
+            }
+        });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

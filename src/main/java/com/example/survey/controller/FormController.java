@@ -63,4 +63,20 @@ public class FormController {
         formService.deleteForm(id);
         return "redirect:/forms";
     }
+
+    @PostMapping("/{id}/publish")
+    public String publish(@PathVariable Integer id) {
+        Form form = formService.getFormById(id).orElseThrow(() -> new IllegalArgumentException("Form not found"));
+        form.setIsPublished((short) 1);
+        formService.save(form);
+        return "redirect:/forms/" + id;
+    }
+
+    @PostMapping("/{id}/unpublish")
+    public String unpublish(@PathVariable Integer id) {
+        Form form = formService.getFormById(id).orElseThrow(() -> new IllegalArgumentException("Form not found"));
+        form.setIsPublished((short) 0);
+        formService.save(form);
+        return "redirect:/forms/" + id;
+    }
 }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/questions")
 public class QuestionController {
@@ -32,8 +34,18 @@ public class QuestionController {
                          @RequestParam String title,
                          @RequestParam String questionType,
                          @RequestParam(defaultValue = "false") Boolean isRequired,
-                         @RequestParam(required = false) String description) {
-        questionService.createQuestion(formId, title, questionType, (short) (isRequired ? 1 : 0), description);
+                         @RequestParam(required = false) String description,
+                         @RequestParam(value = "options", required = false) List<String> options) {
+        Question question = questionService.createQuestion(formId, title, questionType, (short) (isRequired ? 1 : 0), description);
+        
+        if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX"))) {
+            for (String optionText : options) {
+                if (optionText != null && !optionText.trim().isEmpty()) {
+                    questionService.createOption(question.getQuestionId(), optionText.trim());
+                }
+            }
+        }
+        
         return "redirect:/forms/" + formId;
     }
 
@@ -41,6 +53,7 @@ public class QuestionController {
     public String edit(@PathVariable Integer id, Model model) {
         Question question = questionService.getQuestionById(id).orElseThrow(() -> new IllegalArgumentException("Question not found"));
         model.addAttribute("question", question);
+        model.addAttribute("options", questionService.getOptionsByQuestion(id));
         return "questions/edit";
     }
 
@@ -49,8 +62,20 @@ public class QuestionController {
                          @RequestParam String title,
                          @RequestParam String questionType,
                          @RequestParam(defaultValue = "false") Boolean isRequired,
-                         @RequestParam(required = false) String description) {
+                         @RequestParam(required = false) String description,
+                         @RequestParam(value = "options", required = false) List<String> options) {
         Question question = questionService.updateQuestion(id, title, questionType, (short) (isRequired ? 1 : 0), description);
+        
+        // Refresh options
+        questionService.deleteOptionsByQuestion(id);
+        if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX"))) {
+            for (String optionText : options) {
+                if (optionText != null && !optionText.trim().isEmpty()) {
+                    questionService.createOption(id, optionText.trim());
+                }
+            }
+        }
+        
         return "redirect:/forms/" + question.getFormId();
     }
 

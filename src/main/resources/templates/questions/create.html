@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/forms}">Мои опросы</a></li>
+            <li class="breadcrumb-item"><a th:href="@{'/forms/' + ${form.formId}}" th:text="${form.title}">Название</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Новый вопрос</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Добавить новый вопрос</h2>
+                    <form th:action="@{'/questions/create/' + ${form.formId}}" method="post">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Текст вопроса</label>
+                            <input type="text" class="form-control" id="title" name="title" required placeholder="Введите текст вопроса...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание/подсказка (необязательно)</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="questionType" class="form-label">Тип вопроса</label>
+                                <select class="form-control" id="questionType" name="questionType" required onchange="toggleOptions()">
+                                    <option value="TEXT">Текстовый ответ</option>
+                                    <option value="MULTIPLE_CHOICE">Один из списка (Radio)</option>
+                                    <option value="CHECKBOX">Несколько из списка (Checkbox)</option>
+                                    <option value="SCALE">Шкала (1-10)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="isRequired" name="isRequired" value="true">
+                                    <label class="form-check-label" for="isRequired">
+                                        Обязательный вопрос
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="options-container" class="mt-4" style="display: none;">
+                            <h5>Варианты ответов</h5>
+                            <div id="options-list">
+                                <div class="input-group mb-2 option-item">
+                                    <input type="text" class="form-control" name="options" placeholder="Вариант 1">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+                                </div>
+                                <div class="input-group mb-2 option-item">
+                                    <input type="text" class="form-control" name="options" placeholder="Вариант 2">
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">Добавить вариант</button>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success">Создать вопрос</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleOptions() {
+        const type = document.getElementById('questionType').value;
+        const container = document.getElementById('options-container');
+        if (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX') {
+            container.style.display = 'block';
+            // Ensure at least one option has a required attribute if needed
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function addOption() {
+        const list = document.getElementById('options-list');
+        const count = list.getElementsByClassName('option-item').length + 1;
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2 option-item';
+        div.innerHTML = `
+            <input type="text" class="form-control" name="options" placeholder="Вариант ${count}">
+            <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+        `;
+        list.appendChild(div);
+    }
+
+    function removeOption(btn) {
+        const list = document.getElementById('options-list');
+        if (list.getElementsByClassName('option-item').length > 1) {
+            btn.parentElement.remove();
+        } else {
+            alert('Должен быть хотя бы один вариант ответа');
+        }
+    }
+</script>
+</body>
+</html>

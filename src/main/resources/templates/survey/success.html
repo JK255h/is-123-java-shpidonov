@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container text-center mt-5">
+    <div class="alert alert-success">
+        <h2 class="alert-heading">Спасибо!</h2>
+        <p>Ваши ответы успешно отправлены.</p>
+        <hr>
+        <p class="mb-0">
+            <a th:href="@{/}" class="btn btn-outline-primary">Вернуться на главную</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

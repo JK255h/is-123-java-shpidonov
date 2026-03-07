@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/forms}">Мои опросы</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${form.title}">Название</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="card-title mb-0" th:text="${form.title}">Название</h2>
+                    <span th:if="${form.isPublished == 1}" class="badge bg-success">Опубликован</span>
+                    <span th:if="${form.isPublished == 0}" class="badge bg-secondary">Черновик</span>
+                </div>
+                <div>
+                    <a th:href="@{'/forms/' + ${form.formId} + '/results'}" class="btn btn-outline-primary">Результаты</a>
+                    <form th:if="${form.isPublished == 0}" th:action="@{'/forms/' + ${form.formId} + '/publish'}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success">Опубликовать</button>
+                    </form>
+                    <form th:if="${form.isPublished == 1}" th:action="@{'/forms/' + ${form.formId} + '/unpublish'}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-warning">Снять с публикации</button>
+                    </form>
+                    <form th:action="@{'/forms/' + ${form.formId} + '/delete'}" method="post" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этот опрос?');">
+                        <button type="submit" class="btn btn-danger">Удалить опрос</button>
+                    </form>
+                </div>
+            </div>
+            <p class="card-text text-muted" th:text="${form.description}">Описание</p>
+            
+            <div th:if="${form.isPublished == 1}" class="mt-3 p-3 bg-light border rounded">
+                <strong>Опрос опубликован!</strong>
+                <a th:href="@{'/survey/' + ${form.formId}}" class="btn btn-sm btn-info ms-2" target="_blank">Пройти опрос</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Вопросы</h3>
+        <a th:href="@{'/questions/create/' + ${form.formId}}" class="btn btn-primary">Добавить вопрос</a>
+    </div>
+
+    <div th:if="${questions.empty}" class="alert alert-light border">
+        В этом опросе пока нет вопросов.
+    </div>
+
+    <div class="list-group">
+        <div th:each="question, iter : ${questions}" class="list-group-item mb-3 border rounded shadow-sm">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-secondary mb-2" th:text="${question.questionType}">ТИП</span>
+                    <h5 th:text="${(iter.index + 1) + '. ' + question.title}">Текст вопроса</h5>
+                    <p class="text-muted small" th:text="${question.description}"></p>
+                </div>
+                <div>
+                    <a th:href="@{'/questions/' + ${question.questionId} + '/edit'}" class="btn btn-sm btn-outline-primary">Изменить</a>
+                    <form th:action="@{'/questions/' + ${question.questionId} + '/delete'}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить вопрос?')">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
