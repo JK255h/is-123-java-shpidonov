@@ -20,6 +20,7 @@
                     <span th:if="${form.isPublished == 0}" class="badge bg-secondary">Черновик</span>
                 </div>
                 <div>
+                    <a th:href="@{'/forms/' + ${form.formId} + '/edit'}" class="btn btn-outline-secondary">Изменить данные</a>
                     <a th:href="@{'/forms/' + ${form.formId} + '/results'}" class="btn btn-outline-primary">Результаты</a>
                     <form th:if="${form.isPublished == 0}" th:action="@{'/forms/' + ${form.formId} + '/publish'}" method="post" class="d-inline">
                         <button type="submit" class="btn btn-success">Опубликовать</button>
@@ -51,18 +52,52 @@
     </div>
 
     <div class="list-group">
-        <div th:each="question, iter : ${questions}" class="list-group-item mb-3 border rounded shadow-sm">
+        <div th:each="question, iter : ${questions}" class="list-group-item mb-4 border rounded shadow-sm p-4 bg-white">
             <div class="d-flex justify-content-between">
-                <div>
-                    <span class="badge bg-secondary mb-2" th:text="${question.questionType}">ТИП</span>
-                    <h5 th:text="${(iter.index + 1) + '. ' + question.title}">Текст вопроса</h5>
-                    <p class="text-muted small" th:text="${question.description}"></p>
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-primary me-2" th:text="${question.questionType}">ТИП</span>
+                        <span th:if="${question.isRequired == 1}" class="badge bg-danger">Обязательный</span>
+                    </div>
+                    
+                    <h5 class="mb-1" th:text="${(iter.index + 1) + '. ' + question.title}">Текст вопроса</h5>
+                    <p class="text-muted small mb-3" th:if="${question.description != null}" th:text="${question.description}"></p>
+
+                    <!-- Отображение вариантов -->
+                    <div th:if="${question.questionType == 'MULTIPLE_CHOICE' or question.questionType == 'CHECKBOX'}" class="mt-2 ms-3">
+                        <ul class="list-unstyled">
+                            <li th:each="opt : ${optionsMap[question.questionId]}" class="mb-1">
+                                <i th:class="${question.questionType == 'MULTIPLE_CHOICE' ? 'bi bi-circle' : 'bi bi-check-square'}"></i>
+                                <span class="ms-2" th:text="${opt.optionText}"></span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Отображение шкалы -->
+                    <div th:if="${question.questionType == 'SCALE'}" class="mt-2 ms-3">
+                        <div class="d-flex align-items-center bg-light p-2 rounded" style="max-width: 300px;">
+                            <span class="fw-bold" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMin : 1}">1</span>
+                            <div class="mx-3 flex-grow-1 border-top"></div>
+                            <span class="fw-bold" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMax : 5}">5</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <a th:href="@{'/questions/' + ${question.questionId} + '/edit'}" class="btn btn-sm btn-outline-primary">Изменить</a>
-                    <form th:action="@{'/questions/' + ${question.questionId} + '/delete'}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить вопрос?')">Удалить</button>
-                    </form>
+                
+                <div class="ms-3 text-end" style="min-width: 120px;">
+                    <div class="btn-group btn-group-sm mb-3 d-block">
+                        <form th:action="@{'/questions/' + ${question.questionId} + '/up'}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-secondary" th:disabled="${iter.first}">↑</button>
+                        </form>
+                        <form th:action="@{'/questions/' + ${question.questionId} + '/down'}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-secondary" th:disabled="${iter.last}">↓</button>
+                        </form>
+                    </div>
+                    <div class="d-grid gap-1">
+                        <a th:href="@{'/questions/' + ${question.questionId} + '/edit'}" class="btn btn-sm btn-info">Изменить</a>
+                        <form th:action="@{'/questions/' + ${question.questionId} + '/delete'}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить вопрос?')">Удалить</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

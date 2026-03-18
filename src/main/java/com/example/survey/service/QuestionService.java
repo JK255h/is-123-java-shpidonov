@@ -27,7 +27,7 @@ public class QuestionService {
     }
 
     public List<Question> getQuestionsByForm(Integer formId) {
-        return questionRepository.findByFormIdOrderByQuestionId(formId);
+        return questionRepository.findByFormIdOrderByQuestionIdAsc(formId);
     }
     
     public Optional<Question> getQuestionById(Integer questionId) {
@@ -41,7 +41,8 @@ public class QuestionService {
         question.setQuestionType(questionType);
         question.setIsRequired(isRequired);
         question.setDescription(description);
-        question.setCreatedAt(LocalDateTime.now());
+        // question.setOrderNumber(nextOrder); // Колонки может не быть в БД
+        // question.setCreatedAt(LocalDateTime.now());
         return questionRepository.save(question);
     }
 
@@ -87,5 +88,51 @@ public class QuestionService {
     
     public QuestionSetting saveQuestionSettings(QuestionSetting settings) {
         return questionSettingRepository.save(settings);
+    }
+
+    @Transactional
+    public void moveUp(Integer questionId) {
+        /*
+        Question current = questionRepository.findById(questionId).orElseThrow();
+        List<Question> all = getQuestionsByForm(current.getFormId());
+        int index = -1;
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getQuestionId().equals(questionId)) {
+                index = i;
+                break;
+            }
+        }
+        if (index > 0) {
+            Question prev = all.get(index - 1);
+            int temp = current.getOrderNumber();
+            current.setOrderNumber(prev.getOrderNumber());
+            prev.setOrderNumber(temp);
+            questionRepository.save(current);
+            questionRepository.save(prev);
+        }
+        */
+    }
+
+    @Transactional
+    public void moveDown(Integer questionId) {
+        /*
+        Question current = questionRepository.findById(questionId).orElseThrow();
+        List<Question> all = getQuestionsByForm(current.getFormId());
+        int index = -1;
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getQuestionId().equals(questionId)) {
+                index = i;
+                break;
+            }
+        }
+        if (index >= 0 && index < all.size() - 1) {
+            Question next = all.get(index + 1);
+            int temp = current.getOrderNumber();
+            current.setOrderNumber(next.getOrderNumber());
+            next.setOrderNumber(temp);
+            questionRepository.save(current);
+            questionRepository.save(next);
+        }
+        */
     }
 }

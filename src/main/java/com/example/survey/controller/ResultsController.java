@@ -92,7 +92,7 @@ public class ResultsController {
         sb.append("Всего ответов: ").append(responses.size()).append("\n\n");
 
         for (SurveyResponse resp : responses) {
-            sb.append("Ответ №").append(resp.getResponseId()).append(" (").append(resp.getCompletedAt()).append("):\n");
+            sb.append("Ответ №").append(resp.getResponseId()).append(" :\n");
             List<Answer> answers = responseService.getAnswersByResponse(resp.getResponseId());
             for (Question q : questions) {
                 sb.append("  - ").append(q.getTitle()).append(": ");

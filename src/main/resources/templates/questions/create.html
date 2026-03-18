@@ -53,12 +53,23 @@
                                     <input type="text" class="form-control" name="options" placeholder="Вариант 1">
                                     <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
                                 </div>
-                                <div class="input-group mb-2 option-item">
-                                    <input type="text" class="form-control" name="options" placeholder="Вариант 2">
-                                    <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
-                                </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">Добавить вариант</button>
+                        </div>
+
+                        <!-- Настройки шкалы -->
+                        <div id="scale-settings" class="mt-4" style="display: none;">
+                            <h5>Настройки шкалы</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Минимум</label>
+                                    <input type="number" class="form-control" name="scaleMin" value="1">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Максимум</label>
+                                    <input type="number" class="form-control" name="scaleMax" value="5">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-grid mt-4">
@@ -74,13 +85,11 @@
 <script>
     function toggleOptions() {
         const type = document.getElementById('questionType').value;
-        const container = document.getElementById('options-container');
-        if (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX') {
-            container.style.display = 'block';
-            // Ensure at least one option has a required attribute if needed
-        } else {
-            container.style.display = 'none';
-        }
+        const optContainer = document.getElementById('options-container');
+        const scaleSettings = document.getElementById('scale-settings');
+        
+        optContainer.style.display = (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX') ? 'block' : 'none';
+        scaleSettings.style.display = (type === 'SCALE') ? 'block' : 'none';
     }
 
     function addOption() {

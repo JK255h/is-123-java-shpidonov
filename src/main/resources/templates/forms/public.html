@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header-css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Доступные опросы</h2>
+            <p class="text-muted">Найдите интересующий вас опрос и поделитесь своим мнением.</p>
+        </div>
+        <div class="col-md-4">
+            <form th:action="@{/forms/public}" method="get" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Поиск по названию..." th:value="${search}">
+                <button type="submit" class="btn btn-primary">Найти</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${forms.empty}" class="alert alert-info">
+        Опросов не найдено.
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4" th:each="form : ${forms}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${form.title}">Название</h5>
+                    <p class="card-text text-truncate" th:text="${form.description}">Описание</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Автор: <span th:text="${form.ownerName}">Имя</span></small>
+                        <a th:href="@{'/survey/' + ${form.formId}}" class="btn btn-sm btn-success">Пройти</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -3,7 +3,6 @@ package com.example.survey.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "QUESTIONS")
@@ -18,18 +17,15 @@ public class Question {
     @Column(name = "FORM_ID")
     private Integer formId;
 
-    @Column(name = "TITLE", nullable = false)
+    @Column(name = "TITLE")
     private String title;
 
-    @Column(name = "QUESTION_TYPE", nullable = false)
+    @Column(name = "QUESTION_TYPE")
     private String questionType;
 
-    @Column(name = "IS_REQUIRED", nullable = false)
+    @Column(name = "IS_REQUIRED")
     private Short isRequired;
 
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 2000)
     private String description;
-
-    @Column(name = "CREATED_AT")
-    private LocalDateTime createdAt;
 }

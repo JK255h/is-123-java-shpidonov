@@ -23,10 +23,19 @@
                             </div>
 
                             <!-- SCALE Question -->
-                            <div th:if="${question.questionType == 'SCALE'}" class="d-flex justify-content-between align-items-center">
-                                <span>1</span>
-                                <input type="range" class="form-range mx-3" min="1" max="10" th:name="'q_' + ${question.questionId}">
-                                <span>10</span>
+                            <div th:if="${question.questionType == 'SCALE'}" class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMin : 1}">1</span>
+                                    <input type="range" class="form-range mx-3 scale-slider" 
+                                           th:min="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMin : 1}" 
+                                           th:max="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMax : 5}" 
+                                           th:name="'q_' + ${question.questionId}"
+                                           oninput="updateValue(this)">
+                                    <span class="fw-bold" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMax : 5}">5</span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="badge bg-primary fs-6">Выбрано: <span class="current-value" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMin : 1}">1</span></span>
+                                </div>
                             </div>
 
                             <!-- MULTIPLE_CHOICE (Radio) -->
@@ -57,5 +66,15 @@
         </div>
     </div>
 </div>
+
+<script>
+    function updateValue(slider) {
+        const container = slider.closest('.mb-3');
+        const display = container.querySelector('.current-value');
+        if (display) {
+            display.textContent = slider.value;
+        }
+    }
+</script>
 </body>
 </html>

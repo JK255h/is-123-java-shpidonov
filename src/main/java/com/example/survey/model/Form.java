@@ -17,8 +17,10 @@ public class Form {
     @Column(name = "OWNER_ID", nullable = false)
     private Integer ownerId;
 
+    /*
     @Column(name = "OWNER_NAME")
     private String ownerName;
+    */
 
     @Column(name = "TITLE", nullable = false)
     private String title;
@@ -29,6 +31,8 @@ public class Form {
     @Column(name = "IS_PUBLISHED", nullable = false)
     private Short isPublished;
 
+    /*
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
+    */
 }

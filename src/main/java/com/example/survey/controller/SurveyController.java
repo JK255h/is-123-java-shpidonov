@@ -43,14 +43,16 @@ public class SurveyController {
         model.addAttribute("form", form);
         model.addAttribute("questions", questions);
         
-        // Add options for each question
+        // Add options and settings for each question
         Map<Integer, List<com.example.survey.model.Option>> optionsMap = new java.util.HashMap<>();
+        Map<Integer, com.example.survey.model.QuestionSetting> settingsMap = new java.util.HashMap<>();
+        
         for (Question q : questions) {
-            if (q.getQuestionType().equals("MULTIPLE_CHOICE") || q.getQuestionType().equals("CHECKBOX")) {
-                optionsMap.put(q.getQuestionId(), questionService.getOptionsByQuestion(q.getQuestionId()));
-            }
+            optionsMap.put(q.getQuestionId(), questionService.getOptionsByQuestion(q.getQuestionId()));
+            questionService.getQuestionSettings(q.getQuestionId()).ifPresent(s -> settingsMap.put(q.getQuestionId(), s));
         }
         model.addAttribute("optionsMap", optionsMap);
+        model.addAttribute("settingsMap", settingsMap);
         
         return "survey/take";
     }

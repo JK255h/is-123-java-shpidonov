@@ -31,7 +31,7 @@ public class UserService {
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setIsAdmin((short) 0);
-        user.setCreatedAt(LocalDateTime.now());
+        // user.setCreatedAt(LocalDateTime.now());
 
         userRepository.save(user);
     }

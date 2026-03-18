@@ -26,6 +26,8 @@ public class User {
     @Column(name = "IS_ADMIN")
     private Short isAdmin;
 
+    /*
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
+    */
 }

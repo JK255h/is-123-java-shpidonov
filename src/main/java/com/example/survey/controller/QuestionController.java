@@ -35,15 +35,27 @@ public class QuestionController {
                          @RequestParam String questionType,
                          @RequestParam(defaultValue = "false") Boolean isRequired,
                          @RequestParam(required = false) String description,
-                         @RequestParam(value = "options", required = false) List<String> options) {
+                         @RequestParam(value = "options", required = false) List<String> options,
+                         @RequestParam(required = false) Integer scaleMin,
+                         @RequestParam(required = false) Integer scaleMax) {
         Question question = questionService.createQuestion(formId, title, questionType, (short) (isRequired ? 1 : 0), description);
         
+        // Сохраняем варианты для списков
         if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX"))) {
             for (String optionText : options) {
                 if (optionText != null && !optionText.trim().isEmpty()) {
                     questionService.createOption(question.getQuestionId(), optionText.trim());
                 }
             }
+        }
+        
+        // Сохраняем настройки для шкалы
+        if (questionType.equals("SCALE")) {
+            com.example.survey.model.QuestionSetting settings = new com.example.survey.model.QuestionSetting();
+            settings.setQuestionId(question.getQuestionId());
+            settings.setScaleMin(scaleMin != null ? scaleMin : 1);
+            settings.setScaleMax(scaleMax != null ? scaleMax : 5);
+            questionService.saveQuestionSettings(settings);
         }
         
         return "redirect:/forms/" + formId;
@@ -85,5 +97,19 @@ public class QuestionController {
         Integer formId = question.getFormId();
         questionService.deleteQuestion(id);
         return "redirect:/forms/" + formId;
+    }
+
+    @PostMapping("/{id}/up")
+    public String moveUp(@PathVariable Integer id) {
+        Question q = questionService.getQuestionById(id).orElseThrow();
+        questionService.moveUp(id);
+        return "redirect:/forms/" + q.getFormId();
+    }
+
+    @PostMapping("/{id}/down")
+    public String moveDown(@PathVariable Integer id) {
+        Question q = questionService.getQuestionById(id).orElseThrow();
+        questionService.moveDown(id);
+        return "redirect:/forms/" + q.getFormId();
     }
 }

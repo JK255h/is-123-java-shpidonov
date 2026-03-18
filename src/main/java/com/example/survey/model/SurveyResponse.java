@@ -20,6 +20,8 @@ public class SurveyResponse {
     @Column(name = "USER_ID")
     private Integer userId;
 
+    /*
     @Column(name = "COMPLETED_AT")
     private LocalDateTime completedAt;
+    */
 }
