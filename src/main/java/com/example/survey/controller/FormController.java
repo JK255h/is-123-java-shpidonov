@@ -30,8 +30,10 @@ public class FormController {
     public String listForms(Model model) {
         User currentUser = userDetailsService.getCurrentUser();
         if (currentUser != null) {
-            List<Form> myForms = formService.getFormsByUser(currentUser.getUserId());
-            model.addAttribute("forms", myForms);
+            boolean isAdmin = currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+            List<Form> forms = isAdmin ? formService.getAllForms() : formService.getFormsByUser(currentUser.getUserId());
+            model.addAttribute("forms", forms);
+            model.addAttribute("isAdmin", isAdmin);
         }
         return "forms/index";
     }
@@ -60,9 +62,10 @@ public class FormController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Integer id, Model model) {
         Form form = formService.getFormById(id).orElseThrow(() -> new IllegalArgumentException("Form not found"));
-        // Check ownership
+        // Check ownership or admin
         User currentUser = userDetailsService.getCurrentUser();
-        if (currentUser == null || !form.getOwnerId().equals(currentUser.getUserId())) {
+        boolean isAdmin = currentUser != null && currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+        if (currentUser == null || (!form.getOwnerId().equals(currentUser.getUserId()) && !isAdmin)) {
             return "redirect:/login";
         }
         model.addAttribute("form", form);
@@ -72,9 +75,10 @@ public class FormController {
     @PostMapping("/{id}/edit")
     public String updateForm(@PathVariable Integer id, @RequestParam String title, @RequestParam(required = false) String description) {
         Form form = formService.getFormById(id).orElseThrow(() -> new IllegalArgumentException("Form not found"));
-        // Check ownership
+        // Check ownership or admin
         User currentUser = userDetailsService.getCurrentUser();
-        if (currentUser == null || !form.getOwnerId().equals(currentUser.getUserId())) {
+        boolean isAdmin = currentUser != null && currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+        if (currentUser == null || (!form.getOwnerId().equals(currentUser.getUserId()) && !isAdmin)) {
             return "redirect:/login";
         }
         form.setTitle(title);
@@ -107,8 +111,13 @@ public class FormController {
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Integer id) {
-        // Add ownership check here
-        formService.deleteForm(id);
+        Form form = formService.getFormById(id).orElseThrow(() -> new IllegalArgumentException("Form not found"));
+        User currentUser = userDetailsService.getCurrentUser();
+        boolean isAdmin = currentUser != null && currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+        
+        if (currentUser != null && (form.getOwnerId().equals(currentUser.getUserId()) || isAdmin)) {
+            formService.deleteForm(id);
+        }
         return "redirect:/forms";
     }
 

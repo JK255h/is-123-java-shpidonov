@@ -4,15 +4,29 @@
 <body>
 <div th:replace="~{fragments :: navbar}"></div>
 <div class="container">
-    <h2>Мои опросы</h2>
-    <div th:if="${forms == null or forms.empty}" class="alert alert-info">У вас еще нет опросов.</div>
+    <h2 th:text="${isAdmin ? 'Управление опросами' : 'Мои опросы'}">Мои опросы</h2>
+    <div th:if="${forms == null or forms.empty}" class="alert alert-info">Опросов пока нет.</div>
     <div class="row">
-        <div class="col-md-4 mb-3" th:each="form : ${forms}">
-            <div class="card">
+        <div class="col-md-6 col-lg-4 mb-3" th:each="form : ${forms}">
+            <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title" th:text="${form.title}">Название</h5>
-                    <p class="card-text" th:text="${form.description}">Описание</p>
-                    <a th:href="@{'/forms/' + ${form.formId}}" class="btn btn-info">Просмотр</a>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title" th:text="${form.title}">Название</h5>
+                        <span th:if="${form.isPublished == 1}" class="badge bg-success h-25">Pub</span>
+                    </div>
+                    <p class="card-text text-truncate" th:text="${form.description}">Описание</p>
+                    <div class="small text-muted mb-2">
+                        <div th:if="${isAdmin}">
+                            <i class="bi bi-person"></i> <span th:text="${form.ownerName}">Автор</span>
+                        </div>
+                        <div th:if="${form.createdAt != null}">
+                            <i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(form.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
+                    <a th:href="@{'/forms/' + ${form.formId}}" class="btn btn-sm btn-outline-primary">Управление</a>
+                    <a th:if="${form.isPublished == 1}" th:href="@{'/survey/' + ${form.formId}}" class="btn btn-sm btn-outline-info" target="_blank">Пройти</a>
                 </div>
             </div>
         </div>

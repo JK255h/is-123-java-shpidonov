@@ -37,11 +37,13 @@ public class QuestionController {
                          @RequestParam(required = false) String description,
                          @RequestParam(value = "options", required = false) List<String> options,
                          @RequestParam(required = false) Integer scaleMin,
-                         @RequestParam(required = false) Integer scaleMax) {
+                         @RequestParam(required = false) Integer scaleMax,
+                         @RequestParam(required = false) String gridRowsText,
+                         @RequestParam(required = false) String gridColumnsText) {
         Question question = questionService.createQuestion(formId, title, questionType, (short) (isRequired ? 1 : 0), description);
         
         // Сохраняем варианты для списков
-        if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX"))) {
+        if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX") || questionType.equals("DROPDOWN"))) {
             for (String optionText : options) {
                 if (optionText != null && !optionText.trim().isEmpty()) {
                     questionService.createOption(question.getQuestionId(), optionText.trim());
@@ -49,12 +51,17 @@ public class QuestionController {
             }
         }
         
-        // Сохраняем настройки для шкалы
-        if (questionType.equals("SCALE")) {
+        // Сохраняем настройки для шкалы или сетки
+        if (questionType.equals("SCALE") || questionType.equals("GRID")) {
             com.example.survey.model.QuestionSetting settings = new com.example.survey.model.QuestionSetting();
             settings.setQuestionId(question.getQuestionId());
-            settings.setScaleMin(scaleMin != null ? scaleMin : 1);
-            settings.setScaleMax(scaleMax != null ? scaleMax : 5);
+            if (questionType.equals("SCALE")) {
+                settings.setScaleMin(scaleMin != null ? scaleMin : 1);
+                settings.setScaleMax(scaleMax != null ? scaleMax : 5);
+            } else {
+                settings.setGridRowsText(gridRowsText);
+                settings.setGridColumnsText(gridColumnsText);
+            }
             questionService.saveQuestionSettings(settings);
         }
         
@@ -66,6 +73,7 @@ public class QuestionController {
         Question question = questionService.getQuestionById(id).orElseThrow(() -> new IllegalArgumentException("Question not found"));
         model.addAttribute("question", question);
         model.addAttribute("options", questionService.getOptionsByQuestion(id));
+        model.addAttribute("settings", questionService.getQuestionSettings(id).orElse(new com.example.survey.model.QuestionSetting()));
         return "questions/edit";
     }
 
@@ -75,17 +83,43 @@ public class QuestionController {
                          @RequestParam String questionType,
                          @RequestParam(defaultValue = "false") Boolean isRequired,
                          @RequestParam(required = false) String description,
-                         @RequestParam(value = "options", required = false) List<String> options) {
+                         @RequestParam(value = "options", required = false) List<String> options,
+                         @RequestParam(required = false) Integer scaleMin,
+                         @RequestParam(required = false) Integer scaleMax,
+                         @RequestParam(required = false) String gridRowsText,
+                         @RequestParam(required = false) String gridColumnsText) {
         Question question = questionService.updateQuestion(id, title, questionType, (short) (isRequired ? 1 : 0), description);
         
         // Refresh options
         questionService.deleteOptionsByQuestion(id);
-        if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX"))) {
+        if (options != null && (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("CHECKBOX") || questionType.equals("DROPDOWN"))) {
             for (String optionText : options) {
                 if (optionText != null && !optionText.trim().isEmpty()) {
                     questionService.createOption(id, optionText.trim());
                 }
             }
+        }
+
+        // Update settings
+        if (questionType.equals("SCALE") || questionType.equals("GRID")) {
+            com.example.survey.model.QuestionSetting settings = questionService.getQuestionSettings(id)
+                    .orElse(new com.example.survey.model.QuestionSetting());
+            settings.setQuestionId(id);
+            if (questionType.equals("SCALE")) {
+                settings.setScaleMin(scaleMin != null ? scaleMin : 1);
+                settings.setScaleMax(scaleMax != null ? scaleMax : 5);
+                settings.setGridRowsText(null);
+                settings.setGridColumnsText(null);
+            } else {
+                settings.setGridRowsText(gridRowsText);
+                settings.setGridColumnsText(gridColumnsText);
+                settings.setScaleMin(null);
+                settings.setScaleMax(null);
+            }
+            questionService.saveQuestionSettings(settings);
+        } else {
+            // Delete settings if type changed to something without settings
+            // (Assuming service handles this or we just leave them)
         }
         
         return "redirect:/forms/" + question.getFormId();

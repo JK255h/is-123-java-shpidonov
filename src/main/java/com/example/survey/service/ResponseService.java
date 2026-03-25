@@ -33,7 +33,18 @@ public class ResponseService {
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
             String key = entry.getKey();
             if (key.startsWith("q_")) {
-                Integer questionId = Integer.parseInt(key.substring(2));
+                Integer questionId;
+                Integer rowIndex = null;
+                
+                String qPart = key.substring(2);
+                if (qPart.contains("_r")) {
+                    String[] parts = qPart.split("_r");
+                    questionId = Integer.parseInt(parts[0]);
+                    rowIndex = Integer.parseInt(parts[1]);
+                } else {
+                    questionId = Integer.parseInt(qPart);
+                }
+                
                 String[] values = entry.getValue();
                 
                 for (String val : values) {
@@ -41,13 +52,20 @@ public class ResponseService {
                     answer.setResponseId(response.getResponseId());
                     answer.setQuestionId(questionId);
                     
-                    try {
-                        // Try to parse as optionId
-                        Integer optionId = Integer.parseInt(val);
-                        answer.setOptionId(optionId);
-                    } catch (NumberFormatException e) {
-                        // Otherwise it's text answer
-                        answer.setAnswerText(val);
+                    if (rowIndex != null) {
+                        // For GRID, we store row index in some field or answer text
+                        // Let's assume we store it as "row:col" or similar in answerText 
+                        // if there is no dedicated GRID support in Answer model
+                        answer.setAnswerText("row_" + rowIndex + ":" + val);
+                    } else {
+                        try {
+                            // Try to parse as optionId (for MULTIPLE_CHOICE, CHECKBOX, DROPDOWN)
+                            Integer optionId = Integer.parseInt(val);
+                            answer.setOptionId(optionId);
+                        } catch (NumberFormatException e) {
+                            // Otherwise it's text answer (TEXT, PARAGRAPH, DATE, TIME, SCALE)
+                            answer.setAnswerText(val);
+                        }
                     }
                     answerRepository.save(answer);
                 }

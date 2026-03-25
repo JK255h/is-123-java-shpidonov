@@ -30,9 +30,10 @@ public class ResultsController {
     public String viewResults(@PathVariable Integer formId, Model model) {
         Form form = formService.getFormById(formId).orElseThrow(() -> new IllegalArgumentException("Form not found"));
         
-        // Ownership check
+        // Ownership check or admin
         User currentUser = userDetailsService.getCurrentUser();
-        if (currentUser == null || !form.getOwnerId().equals(currentUser.getUserId())) {
+        boolean isAdmin = currentUser != null && currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+        if (currentUser == null || (!form.getOwnerId().equals(currentUser.getUserId()) && !isAdmin)) {
             return "redirect:/login";
         }
 

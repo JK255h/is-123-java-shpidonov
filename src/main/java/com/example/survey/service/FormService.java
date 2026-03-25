@@ -26,6 +26,10 @@ public class FormService {
         return formRepository.findByOwnerIdOrderByFormIdDesc(userId);
     }
     
+    public List<Form> getAllForms() {
+        return formRepository.findAllByOrderByFormIdDesc();
+    }
+    
     public List<Form> getPublishedForms(String query) {
         if (query == null || query.trim().isEmpty()) {
             return formRepository.findByIsPublishedOrderByFormIdDesc((short) 1);
@@ -38,11 +42,11 @@ public class FormService {
         
         Form form = new Form();
         form.setOwnerId(ownerId);
-        // form.setOwnerName(user.getUsername());
+        form.setOwnerName(user.getUsername());
         form.setTitle(title);
         form.setDescription(description);
         form.setIsPublished((short) 0);
-        // form.setCreatedAt(LocalDateTime.now());
+        form.setCreatedAt(LocalDateTime.now());
         
         return formRepository.save(form);
     }

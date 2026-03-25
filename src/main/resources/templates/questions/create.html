@@ -30,10 +30,15 @@
                             <div class="col-md-6 mb-3">
                                 <label for="questionType" class="form-label">Тип вопроса</label>
                                 <select class="form-control" id="questionType" name="questionType" required onchange="toggleOptions()">
-                                    <option value="TEXT">Текстовый ответ</option>
+                                    <option value="TEXT">Текстовый ответ (короткий)</option>
+                                    <option value="PARAGRAPH">Текстовый ответ (длинный)</option>
                                     <option value="MULTIPLE_CHOICE">Один из списка (Radio)</option>
                                     <option value="CHECKBOX">Несколько из списка (Checkbox)</option>
+                                    <option value="DROPDOWN">Выпадающий список</option>
                                     <option value="SCALE">Шкала (1-10)</option>
+                                    <option value="DATE">Дата</option>
+                                    <option value="TIME">Время</option>
+                                    <option value="GRID">Сетка (Matrix)</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3 d-flex align-items-end">
@@ -72,6 +77,21 @@
                             </div>
                         </div>
 
+                        <!-- Настройки сетки -->
+                        <div id="grid-settings" class="mt-4" style="display: none;">
+                            <h5>Настройки сетки</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Строки (каждая с новой строки)</label>
+                                    <textarea class="form-control" name="gridRowsText" rows="4" placeholder="Вопрос 1&#10;Вопрос 2"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Колонки (каждая с новой строки)</label>
+                                    <textarea class="form-control" name="gridColumnsText" rows="4" placeholder="Плохо&#10;Хорошо&#10;Отлично"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-success">Создать вопрос</button>
                         </div>
@@ -87,9 +107,11 @@
         const type = document.getElementById('questionType').value;
         const optContainer = document.getElementById('options-container');
         const scaleSettings = document.getElementById('scale-settings');
+        const gridSettings = document.getElementById('grid-settings');
         
-        optContainer.style.display = (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX') ? 'block' : 'none';
+        optContainer.style.display = (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX' || type === 'DROPDOWN') ? 'block' : 'none';
         scaleSettings.style.display = (type === 'SCALE') ? 'block' : 'none';
+        gridSettings.style.display = (type === 'GRID') ? 'block' : 'none';
     }
 
     function addOption() {

@@ -10,4 +10,6 @@ public interface FormRepository extends JpaRepository<Form, Integer> {
     List<Form> findByIsPublishedOrderByFormIdDesc(Short isPublished);
 
     List<Form> findByIsPublishedAndTitleContainingIgnoreCaseOrderByFormIdDesc(Short isPublished, String title);
+
+    List<Form> findAllByOrderByFormIdDesc();
 }

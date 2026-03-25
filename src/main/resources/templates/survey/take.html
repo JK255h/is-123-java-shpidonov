@@ -22,6 +22,33 @@
                                        th:required="${question.isRequired == 1}" placeholder="Ваш ответ...">
                             </div>
 
+                            <!-- PARAGRAPH Question -->
+                            <div th:if="${question.questionType == 'PARAGRAPH'}">
+                                <textarea class="form-control" th:name="'q_' + ${question.questionId}" 
+                                          th:required="${question.isRequired == 1}" rows="4" placeholder="Ваш развернутый ответ..."></textarea>
+                            </div>
+
+                            <!-- DATE Question -->
+                            <div th:if="${question.questionType == 'DATE'}">
+                                <input type="date" class="form-control" th:name="'q_' + ${question.questionId}" 
+                                       th:required="${question.isRequired == 1}">
+                            </div>
+
+                            <!-- TIME Question -->
+                            <div th:if="${question.questionType == 'TIME'}">
+                                <input type="time" class="form-control" th:name="'q_' + ${question.questionId}" 
+                                       th:required="${question.isRequired == 1}">
+                            </div>
+
+                            <!-- DROPDOWN Question -->
+                            <div th:if="${question.questionType == 'DROPDOWN'}">
+                                <select class="form-select" th:name="'q_' + ${question.questionId}" th:required="${question.isRequired == 1}">
+                                    <option value="" disabled selected>Выберите вариант...</option>
+                                    <option th:each="option : ${optionsMap.get(question.questionId)}" 
+                                            th:value="${option.optionId}" th:text="${option.optionText}"></option>
+                                </select>
+                            </div>
+
                             <!-- SCALE Question -->
                             <div th:if="${question.questionType == 'SCALE'}" class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -36,6 +63,30 @@
                                 <div class="text-center">
                                     <span class="badge bg-primary fs-6">Выбрано: <span class="current-value" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMin : 1}">1</span></span>
                                 </div>
+                            </div>
+
+                            <!-- GRID Question -->
+                            <div th:if="${question.questionType == 'GRID'}" class="table-responsive">
+                                <table class="table table-bordered table-striped text-center">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th th:each="col : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '\n')}" 
+                                                th:text="${col.trim()}">Колонка</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="row, rIdx : ${#strings.arraySplit(settingsMap[question.questionId].gridRowsText, '\n')}">
+                                            <td class="text-start fw-bold" th:text="${row.trim()}">Строка</td>
+                                            <td th:each="col, cIdx : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '\n')}">
+                                                <input class="form-check-input" type="radio" 
+                                                       th:name="'q_' + ${question.questionId} + '_r' + ${rIdx.index}" 
+                                                       th:value="${cIdx.index}"
+                                                       th:required="${question.isRequired == 1}">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <!-- MULTIPLE_CHOICE (Radio) -->

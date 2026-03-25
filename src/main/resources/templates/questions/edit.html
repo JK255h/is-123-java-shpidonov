@@ -29,10 +29,15 @@
                             <div class="col-md-6 mb-3">
                                 <label for="questionType" class="form-label">Тип вопроса</label>
                                 <select class="form-control" id="questionType" name="questionType" required onchange="toggleOptions()">
-                                    <option value="TEXT" th:selected="${question.questionType == 'TEXT'}">Текстовый ответ</option>
+                                    <option value="TEXT" th:selected="${question.questionType == 'TEXT'}">Текстовый ответ (короткий)</option>
+                                    <option value="PARAGRAPH" th:selected="${question.questionType == 'PARAGRAPH'}">Текстовый ответ (длинный)</option>
                                     <option value="MULTIPLE_CHOICE" th:selected="${question.questionType == 'MULTIPLE_CHOICE'}">Один из списка (Radio)</option>
                                     <option value="CHECKBOX" th:selected="${question.questionType == 'CHECKBOX'}">Несколько из списка (Checkbox)</option>
+                                    <option value="DROPDOWN" th:selected="${question.questionType == 'DROPDOWN'}">Выпадающий список</option>
                                     <option value="SCALE" th:selected="${question.questionType == 'SCALE'}">Шкала (1-10)</option>
+                                    <option value="DATE" th:selected="${question.questionType == 'DATE'}">Дата</option>
+                                    <option value="TIME" th:selected="${question.questionType == 'TIME'}">Время</option>
+                                    <option value="GRID" th:selected="${question.questionType == 'GRID'}">Сетка (Matrix)</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3 d-flex align-items-end">
@@ -45,7 +50,7 @@
                             </div>
                         </div>
 
-                        <div id="options-container" class="mt-4" th:style="${question.questionType == 'MULTIPLE_CHOICE' || question.questionType == 'CHECKBOX' ? 'display: block;' : 'display: none;'}">
+                        <div id="options-container" class="mt-4" th:style="${question.questionType == 'MULTIPLE_CHOICE' || question.questionType == 'CHECKBOX' || question.questionType == 'DROPDOWN' ? 'display: block;' : 'display: none;'}">
                             <h5>Варианты ответов</h5>
                             <div id="options-list">
                                 <div th:each="option, iter : ${options}" class="input-group mb-2 option-item">
@@ -58,6 +63,36 @@
                                 </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">Добавить вариант</button>
+                        </div>
+
+                        <!-- Настройки шкалы -->
+                        <div id="scale-settings" class="mt-4" th:style="${question.questionType == 'SCALE' ? 'display: block;' : 'display: none;'}">
+                            <h5>Настройки шкалы</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Минимум</label>
+                                    <input type="number" class="form-control" name="scaleMin" th:value="${settings.scaleMin != null ? settings.scaleMin : 1}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Максимум</label>
+                                    <input type="number" class="form-control" name="scaleMax" th:value="${settings.scaleMax != null ? settings.scaleMax : 5}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Настройки сетки -->
+                        <div id="grid-settings" class="mt-4" th:style="${question.questionType == 'GRID' ? 'display: block;' : 'display: none;'}">
+                            <h5>Настройки сетки</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Строки (каждая с новой строки)</label>
+                                    <textarea class="form-control" name="gridRowsText" rows="4" th:text="${settings.gridRowsText}" placeholder="Вопрос 1&#10;Вопрос 2"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Колонки (каждая с новой строки)</label>
+                                    <textarea class="form-control" name="gridColumnsText" rows="4" th:text="${settings.gridColumnsText}" placeholder="Плохо&#10;Хорошо&#10;Отлично"></textarea>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-grid mt-4">
@@ -74,12 +109,13 @@
 <script>
     function toggleOptions() {
         const type = document.getElementById('questionType').value;
-        const container = document.getElementById('options-container');
-        if (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX') {
-            container.style.display = 'block';
-        } else {
-            container.style.display = 'none';
-        }
+        const optContainer = document.getElementById('options-container');
+        const scaleSettings = document.getElementById('scale-settings');
+        const gridSettings = document.getElementById('grid-settings');
+        
+        optContainer.style.display = (type === 'MULTIPLE_CHOICE' || type === 'CHECKBOX' || type === 'DROPDOWN') ? 'block' : 'none';
+        scaleSettings.style.display = (type === 'SCALE') ? 'block' : 'none';
+        gridSettings.style.display = (type === 'GRID') ? 'block' : 'none';
     }
 
     function addOption() {
