@@ -26,15 +26,25 @@ public class FormController {
         this.userDetailsService = userDetailsService;
     }
 
+    @ModelAttribute
+    public void addAttributes(Model model) {
+        User currentUser = userDetailsService.getCurrentUser();
+        boolean isAdmin = currentUser != null && currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("isAdmin", isAdmin);
+    }
+
     @GetMapping
     public String listForms(Model model) {
         User currentUser = userDetailsService.getCurrentUser();
+        List<Form> forms = new java.util.ArrayList<>();
+        
         if (currentUser != null) {
             boolean isAdmin = currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
-            List<Form> forms = isAdmin ? formService.getAllForms() : formService.getFormsByUser(currentUser.getUserId());
-            model.addAttribute("forms", forms);
-            model.addAttribute("isAdmin", isAdmin);
+            forms = isAdmin ? formService.getAllForms() : formService.getFormsByUser(currentUser.getUserId());
         }
+        
+        model.addAttribute("forms", forms);
         return "forms/index";
     }
 

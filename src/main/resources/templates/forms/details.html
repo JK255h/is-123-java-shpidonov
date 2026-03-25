@@ -85,6 +85,29 @@
                             <span class="fw-bold" th:text="${settingsMap[question.questionId] != null ? settingsMap[question.questionId].scaleMax : 5}">5</span>
                         </div>
                     </div>
+
+                    <!-- Отображение сетки -->
+                    <div th:if="${question.questionType == 'GRID' and settingsMap[question.questionId] != null}" class="mt-2 ms-3 table-responsive">
+                        <table class="table table-sm table-bordered text-center" style="max-width: 500px;">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th th:each="col : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '|')}" 
+                                        th:if="${!#strings.isEmpty(col.trim())}"
+                                        th:text="${col.trim()}"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="row : ${#strings.arraySplit(settingsMap[question.questionId].gridRowsText, '|')}">
+                                    <td th:if="${!#strings.isEmpty(row.trim())}" class="text-start fw-bold" th:text="${row.trim()}"></td>
+                                    <td th:each="col : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '|')}"
+                                        th:if="${!#strings.isEmpty(row.trim()) and !#strings.isEmpty(col.trim())}">
+                                        <i class="bi bi-circle text-muted"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <div class="ms-3 text-end" style="min-width: 120px;">

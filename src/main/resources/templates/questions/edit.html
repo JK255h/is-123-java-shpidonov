@@ -86,11 +86,11 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Строки (каждая с новой строки)</label>
-                                    <textarea class="form-control" name="gridRowsText" rows="4" th:text="${settings.gridRowsText}" placeholder="Вопрос 1&#10;Вопрос 2"></textarea>
+                                    <textarea class="form-control" name="gridRowsText" rows="4" th:text="${settings.gridRowsText != null ? #strings.replace(settings.gridRowsText, '|', '&#10;') : ''}" placeholder="Вопрос 1&#10;Вопрос 2"></textarea>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Колонки (каждая с новой строки)</label>
-                                    <textarea class="form-control" name="gridColumnsText" rows="4" th:text="${settings.gridColumnsText}" placeholder="Плохо&#10;Хорошо&#10;Отлично"></textarea>
+                                    <textarea class="form-control" name="gridColumnsText" rows="4" th:text="${settings.gridColumnsText != null ? #strings.replace(settings.gridColumnsText, '|', '&#10;') : ''}" placeholder="Плохо&#10;Хорошо&#10;Отлично"></textarea>
                                 </div>
                             </div>
                         </div>

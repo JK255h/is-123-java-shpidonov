@@ -59,8 +59,13 @@ public class QuestionController {
                 settings.setScaleMin(scaleMin != null ? scaleMin : 1);
                 settings.setScaleMax(scaleMax != null ? scaleMax : 5);
             } else {
-                settings.setGridRowsText(gridRowsText);
-                settings.setGridColumnsText(gridColumnsText);
+                // Нормализуем переносы строк в разделитель |
+                if (gridRowsText != null) {
+                    settings.setGridRowsText(gridRowsText.replaceAll("\\R+", "|"));
+                }
+                if (gridColumnsText != null) {
+                    settings.setGridColumnsText(gridColumnsText.replaceAll("\\R+", "|"));
+                }
             }
             questionService.saveQuestionSettings(settings);
         }
@@ -111,8 +116,13 @@ public class QuestionController {
                 settings.setGridRowsText(null);
                 settings.setGridColumnsText(null);
             } else {
-                settings.setGridRowsText(gridRowsText);
-                settings.setGridColumnsText(gridColumnsText);
+                // Нормализуем переносы строк в разделитель |
+                if (gridRowsText != null) {
+                    settings.setGridRowsText(gridRowsText.replaceAll("\\R+", "|"));
+                }
+                if (gridColumnsText != null) {
+                    settings.setGridColumnsText(gridColumnsText.replaceAll("\\R+", "|"));
+                }
                 settings.setScaleMin(null);
                 settings.setScaleMax(null);
             }

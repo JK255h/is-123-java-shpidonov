@@ -66,19 +66,21 @@
                             </div>
 
                             <!-- GRID Question -->
-                            <div th:if="${question.questionType == 'GRID'}" class="table-responsive">
+                            <div th:if="${question.questionType == 'GRID' and settingsMap[question.questionId] != null}" class="table-responsive">
                                 <table class="table table-bordered table-striped text-center">
                                     <thead>
                                         <tr>
                                             <th></th>
-                                            <th th:each="col : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '\n')}" 
+                                            <th th:each="col : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '|')}" 
+                                                th:if="${!#strings.isEmpty(col.trim())}"
                                                 th:text="${col.trim()}">Колонка</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="row, rIdx : ${#strings.arraySplit(settingsMap[question.questionId].gridRowsText, '\n')}">
-                                            <td class="text-start fw-bold" th:text="${row.trim()}">Строка</td>
-                                            <td th:each="col, cIdx : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '\n')}">
+                                        <tr th:each="row, rIdx : ${#strings.arraySplit(settingsMap[question.questionId].gridRowsText, '|')}">
+                                            <td th:if="${!#strings.isEmpty(row.trim())}" class="text-start fw-bold" th:text="${row.trim()}">Строка</td>
+                                            <td th:each="col, cIdx : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '|')}"
+                                                th:if="${!#strings.isEmpty(row.trim()) and !#strings.isEmpty(col.trim())}">
                                                 <input class="form-check-input" type="radio" 
                                                        th:name="'q_' + ${question.questionId} + '_r' + ${rIdx.index}" 
                                                        th:value="${cIdx.index}"
