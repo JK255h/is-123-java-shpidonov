@@ -18,6 +18,7 @@
                     Привет, <span sec:authentication="name">User</span>!
                 </span>
                 <a class="nav-link" th:href="@{/forms}" sec:authorize="isAuthenticated()">Мои опросы</a>
+                <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()">Профиль</a>
                 <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()">Вход</a>
                 <a class="nav-link" th:href="@{/register}" sec:authorize="isAnonymous()">Регистрация</a>
                 <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" class="d-inline">

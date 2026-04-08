@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль - JavaSurveyApp</title>
+    <link rel="stylesheet" th:href="@{/lib/bootstrap/dist/css/bootstrap.min.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: navbar}"></div>
+
+    <div class="container mt-5">
+        <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0 text-center">Профиль пользователя</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3 border-bottom pb-2">
+                    <div class="col-sm-5 fw-bold">ID пользователя:</div>
+                    <div class="col-sm-7" th:text="${user.userId}"></div>
+                </div>
+                <div class="row mb-3 border-bottom pb-2">
+                    <div class="col-sm-5 fw-bold">Имя пользователя:</div>
+                    <div class="col-sm-7" th:text="${user.username}"></div>
+                </div>
+                <div class="row mb-3 border-bottom pb-2">
+                    <div class="col-sm-5 fw-bold">Email:</div>
+                    <div class="col-sm-7" th:text="${user.email}"></div>
+                </div>
+                <div class="row mb-3 border-bottom pb-2">
+                    <div class="col-sm-5 fw-bold">Роль:</div>
+                    <div class="col-sm-7">
+                        <span th:if="${user.isAdmin == 1}" class="badge bg-danger">Администратор</span>
+                        <span th:unless="${user.isAdmin == 1}" class="badge bg-secondary">Пользователь</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center bg-light">
+                <a th:href="@{/forms}" class="btn btn-outline-primary me-2">Мои опросы</a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Выйти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/lib/jquery/dist/jquery.min.js}"></script>
+    <script th:src="@{/lib/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
