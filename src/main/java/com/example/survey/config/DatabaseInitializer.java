@@ -38,12 +38,12 @@ public class DatabaseInitializer {
                 FBManager manager = new FBManager();
                 manager.setServer("localhost");
                 manager.setPort(3050);
-                manager.setUser(username);
+                manager.setUserName(username);
                 manager.setPassword(password);
                 manager.start();
                 
                 try {
-                    manager.createDatabase(path, "UTF8");
+                    manager.createDatabase(path, username, password);
                     System.out.println("Database created successfully.");
 
                     // Initialize schema and seed data
