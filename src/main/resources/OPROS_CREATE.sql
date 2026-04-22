@@ -1,8 +1,10 @@
 /* Firebird SQL Database Schema for OPROS.FDB */
 
 /* 
-  To create a new database, use:
-  CREATE DATABASE 'localhost:R:/DB/OPROS.FDB' user 'SYSDBA' password 'masterkey' DEFAULT CHARACTER SET UTF8;
+  ИНСТРУКЦИЯ ПО СОЗДАНИЮ БАЗЫ ДАННЫХ:
+  Запустите Firebird ISQL Tool и выполните следующую команду (замените ПУТЬ_К_ПРОЕКТУ на реальный путь):
+  
+  CREATE DATABASE 'localhost:ПУТЬ_К_ПРОЕКТУ/OPROS.FDB' user 'SYSDBA' password 'masterkey' DEFAULT CHARACTER SET UTF8;
 */
 
 -- USERS Table
