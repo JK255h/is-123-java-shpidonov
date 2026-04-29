@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: header-css}"></head>
+<style>
+    .question-image { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; display: block; }
+    .option-image { max-width: 200px; height: auto; border-radius: 4px; margin-top: 5px; display: block; cursor: pointer; }
+</style>
 <body>
 <div th:replace="~{fragments :: navbar}"></div>
 <div class="container">
@@ -12,8 +16,14 @@
                     <p class="text-muted text-center mb-5" th:text="${form.description}">Описание опроса</p>
 
                     <form th:action="@{'/survey/' + ${form.formId} + '/submit'}" method="post">
-                        <div th:each="question, iter : ${questions}" class="mb-4 p-3 border rounded bg-light">
+                        <div th:each="question, iter : ${questions}" class="mb-4 p-4 border rounded bg-white shadow-sm">
                             <h5 th:text="${(iter.index + 1) + '. ' + question.title}">Текст вопроса</h5>
+                            
+                            <!-- Изображение вопроса -->
+                            <div th:if="${settingsMap[question.questionId] != null and settingsMap[question.questionId].imagePath != null}">
+                                <img th:src="${settingsMap[question.questionId].imagePath}" class="question-image shadow-sm" alt="Question Image">
+                            </div>
+
                             <p class="text-muted small mb-3" th:text="${question.description}"></p>
 
                             <!-- TEXT Question -->
@@ -93,19 +103,25 @@
 
                             <!-- MULTIPLE_CHOICE (Radio) -->
                             <div th:if="${question.questionType == 'MULTIPLE_CHOICE'}">
-                                <div th:each="option : ${optionsMap.get(question.questionId)}" class="form-check">
+                                <div th:each="option : ${optionsMap.get(question.questionId)}" class="form-check mb-3">
                                     <input class="form-check-input" type="radio" th:name="'q_' + ${question.questionId}" 
                                            th:id="'opt_' + ${option.optionId}" th:value="${option.optionId}" th:required="${question.isRequired == 1}">
-                                    <label class="form-check-label" th:for="'opt_' + ${option.optionId}" th:text="${option.optionText}"></label>
+                                    <label class="form-check-label w-100" th:for="'opt_' + ${option.optionId}">
+                                        <span th:text="${option.optionText}"></span>
+                                        <img th:if="${option.imagePath != null}" th:src="${option.imagePath}" class="option-image border shadow-sm" alt="Option Image">
+                                    </label>
                                 </div>
                             </div>
 
                             <!-- CHECKBOX -->
                             <div th:if="${question.questionType == 'CHECKBOX'}">
-                                <div th:each="option : ${optionsMap.get(question.questionId)}" class="form-check">
+                                <div th:each="option : ${optionsMap.get(question.questionId)}" class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" th:name="'q_' + ${question.questionId}" 
                                            th:id="'opt_' + ${option.optionId}" th:value="${option.optionId}">
-                                    <label class="form-check-label" th:for="'opt_' + ${option.optionId}" th:text="${option.optionText}"></label>
+                                    <label class="form-check-label w-100" th:for="'opt_' + ${option.optionId}">
+                                        <span th:text="${option.optionText}"></span>
+                                        <img th:if="${option.imagePath != null}" th:src="${option.imagePath}" class="option-image border shadow-sm" alt="Option Image">
+                                    </label>
                                 </div>
                             </div>
                         </div>

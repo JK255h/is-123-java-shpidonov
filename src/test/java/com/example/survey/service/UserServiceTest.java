@@ -31,7 +31,7 @@ class UserServiceTest {
     }
 
     @Test
-    void registerUser_Success() {
+    void registerUserSuccess() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password")).thenReturn("hashed_password");
@@ -42,7 +42,7 @@ class UserServiceTest {
     }
 
     @Test
-    void registerUser_DuplicateUsername() {
+    void registerUserDuplicateUsername() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(new User()));
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -53,7 +53,7 @@ class UserServiceTest {
     }
 
     @Test
-    void registerUser_DuplicateEmail() {
+    void registerUserDuplicateEmail() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(new User()));
 

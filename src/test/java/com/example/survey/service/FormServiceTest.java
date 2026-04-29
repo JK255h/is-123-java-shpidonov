@@ -32,7 +32,7 @@ class FormServiceTest {
     }
 
     @Test
-    void createForm_Success() {
+    void createFormSuccess() {
         User user = new User();
         user.setUserId(1);
         user.setUsername("testowner");
@@ -51,7 +51,7 @@ class FormServiceTest {
     }
 
     @Test
-    void createForm_UserNotFound() {
+    void createFormUserNotFound() {
         when(userRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> {

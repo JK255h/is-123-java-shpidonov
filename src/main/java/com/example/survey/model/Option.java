@@ -18,4 +18,7 @@ public class Option {
 
     @Column(name = "OPTION_TEXT", nullable = false)
     private String optionText;
+
+    @Column(name = "IMAGE_PATH")
+    private String imagePath;
 }

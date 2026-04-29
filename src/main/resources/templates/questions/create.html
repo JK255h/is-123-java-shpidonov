@@ -17,10 +17,15 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Добавить новый вопрос</h2>
-                    <form th:action="@{'/questions/create/' + ${form.formId}}" method="post">
+                    <form th:action="@{'/questions/create/' + ${form.formId}}" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="title" class="form-label">Текст вопроса</label>
                             <input type="text" class="form-control" id="title" name="title" required placeholder="Введите текст вопроса...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="questionImage" class="form-label">Изображение к вопросу (фото или GIF)</label>
+                            <input type="file" class="form-control" id="questionImage" name="questionImage" accept="image/jpeg,image/png,image/gif">
+                            <div class="form-text">Поддерживаются форматы JPG, PNG, GIF.</div>
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Описание/подсказка (необязательно)</label>
@@ -54,9 +59,17 @@
                         <div id="options-container" class="mt-4" style="display: none;">
                             <h5>Варианты ответов</h5>
                             <div id="options-list">
-                                <div class="input-group mb-2 option-item">
-                                    <input type="text" class="form-control" name="options" placeholder="Вариант 1">
-                                    <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+                                <div class="card mb-3 option-item border-light shadow-sm">
+                                    <div class="card-body">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" name="options" placeholder="Текст варианта 1">
+                                            <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="form-label small">Картинка варианта (необязательно)</label>
+                                            <input type="file" class="form-control form-control-sm" name="optionImages" accept="image/jpeg,image/png,image/gif">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">Добавить вариант</button>
@@ -118,10 +131,18 @@
         const list = document.getElementById('options-list');
         const count = list.getElementsByClassName('option-item').length + 1;
         const div = document.createElement('div');
-        div.className = 'input-group mb-2 option-item';
+        div.className = 'card mb-3 option-item border-light shadow-sm';
         div.innerHTML = `
-            <input type="text" class="form-control" name="options" placeholder="Вариант ${count}">
-            <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+            <div class="card-body">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" name="options" placeholder="Текст варианта ${count}">
+                    <button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">Удалить</button>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label small">Картинка варианта (необязательно)</label>
+                    <input type="file" class="form-control form-control-sm" name="optionImages" accept="image/jpeg,image/png,image/gif">
+                </div>
+            </div>
         `;
         list.appendChild(div);
     }
@@ -129,7 +150,8 @@
     function removeOption(btn) {
         const list = document.getElementById('options-list');
         if (list.getElementsByClassName('option-item').length > 1) {
-            btn.parentElement.remove();
+            // Кнопка в input-group, который в card-body, который в option-item
+            btn.closest('.option-item').remove();
         } else {
             alert('Должен быть хотя бы один вариант ответа');
         }

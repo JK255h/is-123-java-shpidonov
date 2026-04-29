@@ -70,10 +70,11 @@ public class QuestionService {
         return optionRepository.findByQuestionIdOrderByOptionId(questionId);
     }
     
-    public Option createOption(Integer questionId, String text) {
+    public Option createOption(Integer questionId, String text, String imagePath) {
         Option option = new Option();
         option.setQuestionId(questionId);
         option.setOptionText(text);
+        option.setImagePath(imagePath);
         return optionRepository.save(option);
     }
     
