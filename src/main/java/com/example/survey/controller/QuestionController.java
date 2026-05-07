@@ -121,6 +121,7 @@ public class QuestionController {
                          @RequestParam(value = "options", required = false) List<String> options,
                          @RequestParam(value = "optionImages", required = false) List<MultipartFile> optionImages,
                          @RequestParam(required = false) MultipartFile questionImage,
+                         @RequestParam(defaultValue = "false") Boolean removeQuestionImage,
                          @RequestParam(required = false) Integer scaleMin,
                          @RequestParam(required = false) Integer scaleMax,
                          @RequestParam(required = false) String gridRowsText,
@@ -133,6 +134,8 @@ public class QuestionController {
         if (questionImage != null && !questionImage.isEmpty()) {
             questionImagePath = fileStorageService.storeFile(questionImage);
         }
+
+        // ... (rest of options handling remains similar)
 
         // Refresh options
         questionService.deleteOptionsByQuestion(id);
@@ -155,7 +158,10 @@ public class QuestionController {
         QuestionSetting settings = questionService.getQuestionSettings(id).orElse(new QuestionSetting());
         settings.setQuestionId(id);
         
-        if (questionImagePath != null) {
+        if (removeQuestionImage) {
+            settings.setHasImage((short) 0);
+            settings.setImagePath(null);
+        } else if (questionImagePath != null) {
             settings.setHasImage((short) 1);
             settings.setImagePath(questionImagePath);
         }

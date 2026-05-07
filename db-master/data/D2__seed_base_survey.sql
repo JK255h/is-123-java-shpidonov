@@ -1,0 +1,57 @@
+/* D2__seed_base_survey.sql - Seed a base survey with various question types */
+
+-- Создаем форму
+INSERT INTO FORMS (OWNER_ID, OWNER_NAME, TITLE, DESCRIPTION, IS_PUBLISHED)
+VALUES (1, 'admin', 'Базовый опрос', 'Демонстрационный опрос со всеми основными типами вопросов', 1);
+
+-- Вопрос 1: Короткий ответ с фото (1.jfif)
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED, DESCRIPTION)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Ответьте, кто на фото?', 'TEXT', 1, 'Посмотрите на изображение и введите имя человека');
+
+INSERT INTO QUESTION_SETTINGS (QUESTION_ID, HAS_IMAGE, IMAGE_PATH)
+VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 1, '/static/uploads/question_1.jfif');
+
+-- Вопрос 2: Развернутый ответ с фото (2.jpg)
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED, DESCRIPTION)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Опишите, что этот человек сделал для мира?', 'PARAGRAPH', 1, 'Ваш ответ должен быть максимально подробным и содержательным');
+
+INSERT INTO QUESTION_SETTINGS (QUESTION_ID, HAS_IMAGE, IMAGE_PATH)
+VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 1, '/static/uploads/question_2.jpg');
+
+-- Вопрос 3: Один вариант выбора
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Как вам такой формат опроса?', 'MULTIPLE_CHOICE', 0);
+
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Отлично');
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Хорошо');
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Нормально');
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Плохо');
+
+-- Вопрос 4: Несколько вариантов выбора
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Какие типы вопросов вы планируете использовать?', 'CHECKBOX', 0);
+
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Текст (короткий/длинный)');
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Выбор (один/несколько)');
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Шкала и Сетка');
+INSERT INTO OPTIONS (QUESTION_ID, OPTION_TEXT) VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 'Дата и Время');
+
+-- Вопрос 5: Шкала
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Оцените общее удобство системы по шкале от 1 до 10', 'SCALE', 0);
+
+INSERT INTO QUESTION_SETTINGS (QUESTION_ID, SCALE_MIN, SCALE_MAX)
+VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 1, 10);
+
+-- Вопрос 6: Сетка
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Оцените следующие характеристики', 'GRID', 0);
+
+INSERT INTO QUESTION_SETTINGS (QUESTION_ID, GRID_ROWS, GRID_COLUMNS, GRID_ROWS_TEXT, GRID_COLUMNS_TEXT)
+VALUES ((SELECT MAX(QUESTION_ID) FROM QUESTIONS), 3, 4, 'Дизайн|Скорость работы|Функциональность', 'Неудовлетворительно|Удовлетворительно|Хорошо|Отлично');
+
+-- Вопрос 7: Дата
+INSERT INTO QUESTIONS (FORM_ID, TITLE, QUESTION_TYPE, IS_REQUIRED)
+VALUES ((SELECT MAX(FORM_ID) FROM FORMS), 'Когда вы планируете запустить свой первый настоящий опрос?', 'DATE', 0);
+
+COMMIT;

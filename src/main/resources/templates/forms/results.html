@@ -12,9 +12,21 @@
         </ol>
     </nav>
 
-    <div class="mb-5">
-        <h2 th:text="'Результаты опроса: ' + ${form.title}">Результаты</h2>
-        <p class="text-muted">Всего ответов: <span th:text="${responsesCount}" class="fw-bold">0</span></p>
+    <div class="mb-5 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 th:text="'Результаты опроса: ' + ${form.title}">Результаты</h2>
+            <p class="text-muted">Всего ответов: <span th:text="${responsesCount}" class="fw-bold">0</span></p>
+        </div>
+        <div class="btn-group" th:if="${responsesCount > 0}">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-download"></i> Экспорт
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" th:href="@{'/forms/' + ${form.formId} + '/results/export/txt'}">TXT формат</a></li>
+                <li><a class="dropdown-item" th:href="@{'/forms/' + ${form.formId} + '/results/export/xml'}">XML формат</a></li>
+                <li><a class="dropdown-item" th:href="@{'/forms/' + ${form.formId} + '/results/export/html'}">HTML формат</a></li>
+            </ul>
+        </div>
     </div>
 
     <div th:if="${responsesCount == 0}" class="alert alert-info">
@@ -27,7 +39,7 @@
         </div>
         <div class="card-body">
             <!-- For Choice/Checkbox Questions -->
-            <div th:if="${question.questionType == 'MULTIPLE_CHOICE' || question.questionType == 'CHECKBOX'}" class="row">
+            <div th:if="${question.questionType == 'MULTIPLE_CHOICE' || question.questionType == 'CHECKBOX' || question.questionType == 'DROPDOWN'}" class="row">
                 <div class="col-md-6">
                     <table class="table table-sm">
                         <thead>
@@ -57,11 +69,11 @@
             </div>
 
             <!-- For Text Questions -->
-            <div th:if="${question.questionType == 'TEXT'}">
+            <div th:if="${question.questionType == 'TEXT' || question.questionType == 'PARAGRAPH'}">
                 <p class="text-muted small">Список ответов:</p>
-                <ul class="list-group list-group-flush">
-                    <!-- Need to pass actual text answers if we want them here -->
-                    <li class="list-group-item">... (см. экспорт для полного списка)</li>
+                <ul class="list-group list-group-flush" style="max-height: 200px; overflow-y: auto;">
+                    <li class="list-group-item py-1" th:each="answer : ${textAnswers.get(question.questionId)}" th:text="${answer}">Ответ</li>
+                    <li class="list-group-item text-muted" th:if="${textAnswers.get(question.questionId) == null || textAnswers.get(question.questionId).isEmpty()}">Нет ответов</li>
                 </ul>
             </div>
         </div>

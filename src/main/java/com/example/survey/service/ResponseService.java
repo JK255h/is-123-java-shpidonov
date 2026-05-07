@@ -27,8 +27,7 @@ public class ResponseService {
         SurveyResponse response = new SurveyResponse();
         response.setFormId(formId);
         response.setUserId(userId);
-        // response.setCompletedAt(LocalDateTime.now());
-        responseRepository.save(response);
+        response = responseRepository.save(response);
 
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
             String key = entry.getKey();

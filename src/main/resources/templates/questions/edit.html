@@ -16,11 +16,26 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Редактировать вопрос</h2>
-                    <form th:action="@{'/questions/' + ${question.questionId} + '/edit'}" method="post">
+                    <form th:action="@{'/questions/' + ${question.questionId} + '/edit'}" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="title" class="form-label">Текст вопроса</label>
                             <input type="text" class="form-control" id="title" name="title" th:value="${question.title}" required>
                         </div>
+                        
+                        <!-- Изображение вопроса -->
+                        <div class="mb-3 p-3 bg-light border rounded">
+                            <label class="form-label fw-bold">Изображение к вопросу</label>
+                            <div th:if="${settings.imagePath != null}" class="mb-2">
+                                <img th:src="${settings.imagePath}" class="img-thumbnail d-block mb-2" style="max-height: 150px;">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="removeQuestionImage" id="removeQuestionImage">
+                                    <label class="form-check-label text-danger" for="removeQuestionImage">Удалить текущее изображение</label>
+                                </div>
+                            </div>
+                            <input type="file" class="form-control" name="questionImage" accept="image/*">
+                            <small class="text-muted">Загрузите новое фото, чтобы заменить текущее</small>
+                        </div>
+
                         <div class="mb-3">
                             <label for="description" class="form-label">Описание/подсказка (необязательно)</label>
                             <textarea class="form-control" id="description" name="description" rows="2" th:text="${question.description}"></textarea>

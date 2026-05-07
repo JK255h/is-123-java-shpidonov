@@ -18,12 +18,14 @@ public class ResultsController {
     private final QuestionService questionService;
     private final ResponseService responseService;
     private final UserDetailsServiceImpl userDetailsService;
+    private final List<ReportGenerator> reportGenerators;
 
-    public ResultsController(FormService formService, QuestionService questionService, ResponseService responseService, UserDetailsServiceImpl userDetailsService) {
+    public ResultsController(FormService formService, QuestionService questionService, ResponseService responseService, UserDetailsServiceImpl userDetailsService, List<ReportGenerator> reportGenerators) {
         this.formService = formService;
         this.questionService = questionService;
         this.responseService = responseService;
         this.userDetailsService = userDetailsService;
+        this.reportGenerators = reportGenerators;
     }
 
     @GetMapping
@@ -45,9 +47,8 @@ public class ResultsController {
         model.addAttribute("questions", questions);
         
         // Prepare statistics
-        // For each question, we can count answers
-        // Map<QuestionId, Map<Value, Count>>
         Map<Integer, Map<String, Long>> stats = new java.util.HashMap<>();
+        Map<Integer, List<String>> textAnswers = new java.util.HashMap<>();
         
         for (Question q : questions) {
             List<Answer> allAnswers = responses.stream()
@@ -55,7 +56,7 @@ public class ResultsController {
                 .filter(a -> a.getQuestionId().equals(q.getQuestionId()))
                 .collect(Collectors.toList());
             
-            if (q.getQuestionType().equals("MULTIPLE_CHOICE") || q.getQuestionType().equals("CHECKBOX")) {
+            if (q.getQuestionType().equals("MULTIPLE_CHOICE") || q.getQuestionType().equals("CHECKBOX") || q.getQuestionType().equals("DROPDOWN")) {
                 List<Option> options = questionService.getOptionsByQuestion(q.getQuestionId());
                 Map<Integer, String> optionMap = options.stream().collect(Collectors.toMap(Option::getOptionId, Option::getOptionText));
                 
@@ -63,7 +64,6 @@ public class ResultsController {
                     .filter(a -> a.getOptionId() != null)
                     .collect(Collectors.groupingBy(a -> optionMap.getOrDefault(a.getOptionId(), "Unknown"), Collectors.counting()));
                 
-                // Ensure all options are present in stats even if count is 0
                 for (Option opt : options) {
                     optionCounts.putIfAbsent(opt.getOptionText(), 0L);
                 }
@@ -73,45 +73,55 @@ public class ResultsController {
                     .filter(a -> a.getAnswerText() != null)
                     .collect(Collectors.groupingBy(Answer::getAnswerText, Collectors.counting()));
                 stats.put(q.getQuestionId(), scaleCounts);
+            } else if (q.getQuestionType().equals("TEXT") || q.getQuestionType().equals("PARAGRAPH")) {
+                List<String> answers = allAnswers.stream()
+                    .map(Answer::getAnswerText)
+                    .filter(t -> t != null && !t.isEmpty())
+                    .collect(Collectors.toList());
+                textAnswers.put(q.getQuestionId(), answers);
             }
         }
         
         model.addAttribute("stats", stats);
+        model.addAttribute("textAnswers", textAnswers);
         
         return "forms/results";
     }
 
-    @GetMapping("/export/txt")
-    @ResponseBody
-    public String exportTxt(@PathVariable Integer formId) {
+    @GetMapping("/export/{format}")
+    public org.springframework.http.ResponseEntity<byte[]> export(@PathVariable Integer formId, @PathVariable String format) {
         Form form = formService.getFormById(formId).orElseThrow(() -> new IllegalArgumentException("Form not found"));
+        
+        // Ownership check or admin
+        User currentUser = userDetailsService.getCurrentUser();
+        boolean isAdmin = currentUser != null && currentUser.getIsAdmin() != null && currentUser.getIsAdmin() == 1;
+        if (currentUser == null || (!form.getOwnerId().equals(currentUser.getUserId()) && !isAdmin)) {
+            return org.springframework.http.ResponseEntity.status(403).build();
+        }
+
         List<SurveyResponse> responses = responseService.getResponsesByForm(formId);
         List<Question> questions = questionService.getQuestionsByForm(formId);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Результаты опроса: ").append(form.getTitle()).append("\n");
-        sb.append("Всего ответов: ").append(responses.size()).append("\n\n");
-
-        for (SurveyResponse resp : responses) {
-            sb.append("Ответ №").append(resp.getResponseId()).append(" :\n");
-            List<Answer> answers = responseService.getAnswersByResponse(resp.getResponseId());
-            for (Question q : questions) {
-                sb.append("  - ").append(q.getTitle()).append(": ");
-                String answerText = answers.stream()
-                    .filter(a -> a.getQuestionId().equals(q.getQuestionId()))
-                    .map(a -> {
-                        if (a.getOptionId() != null) {
-                            return questionService.getOptionsByQuestion(q.getQuestionId()).stream()
-                                .filter(o -> o.getOptionId().equals(a.getOptionId()))
-                                .map(Option::getOptionText).findFirst().orElse("?");
-                        }
-                        return a.getAnswerText();
-                    })
-                    .collect(Collectors.joining(", "));
-                sb.append(answerText).append("\n");
-            }
-            sb.append("\n");
+        
+        Map<Integer, List<Answer>> responseAnswers = new java.util.HashMap<>();
+        for (SurveyResponse r : responses) {
+            responseAnswers.put(r.getResponseId(), responseService.getAnswersByResponse(r.getResponseId()));
         }
-        return sb.toString();
+
+        ReportGenerator generator = reportGenerators.stream()
+                .filter(g -> g.getFileType().equalsIgnoreCase(format))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported format: " + format));
+
+        String content = generator.generateReport(form, questions, responses, responseAnswers);
+        byte[] bytes = content.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        String contentType = "text/plain";
+        if (format.equalsIgnoreCase("xml")) contentType = "application/xml";
+        else if (format.equalsIgnoreCase("html")) contentType = "text/html";
+
+        return org.springframework.http.ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=results_" + formId + "." + format)
+                .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                .body(bytes);
     }
 }

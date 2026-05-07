@@ -39,11 +39,50 @@
             </div>
             <p class="card-text text-muted" th:text="${form.description}">Описание</p>
             
-            <div th:if="${form.isPublished == 1}" class="mt-3 p-3 bg-light border rounded">
-                <strong>Опрос опубликован!</strong>
-                <a th:href="@{'/survey/' + ${form.formId}}" class="btn btn-sm btn-info ms-2" target="_blank">Пройти опрос</a>
-            </div>
-        </div>
+            <div th:if="${form.isPublished == 1}" class="mt-4 p-3 bg-light border rounded">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Ссылка для прохождения опроса:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="publicLink" value="" readonly>
+                            <button class="btn btn-outline-primary" type="button" onclick="copyLink(event)">
+                                <i class="bi bi-clipboard"></i> Копировать
+                            </button>
+                            </div>
+                            </div>
+                            <div class="col-md-4 text-end mt-3 mt-md-0">
+                            <a th:href="@{'/survey/' + ${form.formId}}" class="btn btn-info" target="_blank">
+                            <i class="bi bi-box-arrow-up-right"></i> Перейти
+                            </a>
+                            </div>
+                            </div>
+                            </div>
+
+                            <script th:inline="javascript">
+                            document.addEventListener('DOMContentLoaded', function() {
+                            var formId = [[${form.formId}]];
+                            var publicLinkInput = document.getElementById('publicLink');
+                            if (publicLinkInput) {
+                            publicLinkInput.value = window.location.origin + '/survey/' + formId;
+                            }
+                            });
+
+                            function copyLink(event) {
+                            var copyText = document.getElementById("publicLink");
+                            copyText.select();
+                            copyText.setSelectionRange(0, 99999);
+                            navigator.clipboard.writeText(copyText.value);
+
+                            const btn = event.currentTarget;
+                            const originalHtml = btn.innerHTML;
+                            btn.innerHTML = '<i class="bi bi-check2"></i> Скопировано!';
+                            btn.classList.replace('btn-outline-primary', 'btn-success');
+                            setTimeout(() => {
+                            btn.innerHTML = originalHtml;
+                            btn.classList.replace('btn-success', 'btn-outline-primary');
+                            }, 2000);
+                            }
+                            </script>        </div>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
