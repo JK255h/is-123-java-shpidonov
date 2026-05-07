@@ -26,12 +26,12 @@ public class HtmlReportGenerator implements ReportGenerator {
         sb.append("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Results</title>");
         sb.append("<style>table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #ddd; padding: 8px; } th { background-color: #f2f2f2; }</style>");
         sb.append("</head><body>");
-        sb.append("<h1>").append(form.getTitle()).append("</h1>");
+        sb.append("<h1>").append(escapeHtml(form.getTitle())).append("</h1>");
         sb.append("<p>Всего ответов: ").append(responses.size()).append("</p>");
         
         sb.append("<table><thead><tr><th>№</th>");
         for (Question q : questions) {
-            sb.append("<th>").append(q.getTitle()).append("</th>");
+            sb.append("<th>").append(escapeHtml(q.getTitle())).append("</th>");
         }
         sb.append("</tr></thead><tbody>");
 
@@ -42,19 +42,26 @@ public class HtmlReportGenerator implements ReportGenerator {
             for (Question q : questions) {
                 sb.append("<td>");
                 if (answers != null) {
+                    final Question currentQ = q;
                     String answerText = answers.stream()
-                        .filter(a -> a.getQuestionId().equals(q.getQuestionId()))
+                        .filter(a -> a.getQuestionId().equals(currentQ.getQuestionId()))
                         .map(a -> {
+                            if (currentQ.getQuestionType().equals("GRID")) {
+                                return resolveGridLabel(currentQ, a.getAnswerText());
+                            }
+                            if (currentQ.getQuestionType().equals("SCALE")) {
+                                return a.getAnswerText() != null ? a.getAnswerText() : String.valueOf(a.getOptionId());
+                            }
                             if (a.getOptionId() != null) {
-                                return questionService.getOptionsByQuestion(q.getQuestionId()).stream()
+                                return questionService.getOptionsByQuestion(currentQ.getQuestionId()).stream()
                                     .filter(o -> o.getOptionId().equals(a.getOptionId()))
-                                    .map(Option::getOptionText).findFirst().orElse("?");
+                                    .map(Option::getOptionText).findFirst().orElse("ID:" + a.getOptionId());
                             }
                             return a.getAnswerText();
                         })
-                        .filter(s -> s != null && !s.isEmpty())
+                        .filter(s -> s != null && !s.isEmpty() && !s.equals("null"))
                         .collect(Collectors.joining(", "));
-                    sb.append(answerText);
+                    sb.append(escapeHtml(answerText));
                 }
                 sb.append("</td>");
             }
@@ -63,6 +70,35 @@ public class HtmlReportGenerator implements ReportGenerator {
 
         sb.append("</tbody></table></body></html>");
         return sb.toString();
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
+    }
+
+    private String resolveGridLabel(Question q, String answerText) {
+        if (answerText == null || !answerText.startsWith("row_")) return answerText;
+        try {
+            String[] parts = answerText.split(":");
+            int rIdx = Integer.parseInt(parts[0].substring(4));
+            int cIdx = Integer.parseInt(parts[1]);
+            
+            return questionService.getQuestionSettings(q.getQuestionId()).map(s -> {
+                String[] rows = s.getGridRowsText().split("\\|");
+                String[] cols = s.getGridColumnsText().split("\\|");
+                if (rIdx < rows.length && cIdx < cols.length) {
+                    return rows[rIdx].trim() + ": " + cols[cIdx].trim();
+                }
+                return answerText;
+            }).orElse(answerText);
+        } catch (Exception e) {
+            return answerText;
+        }
     }
 
     @Override

@@ -17,7 +17,10 @@
 
                     <form th:action="@{'/survey/' + ${form.formId} + '/submit'}" method="post">
                         <div th:each="question, iter : ${questions}" class="mb-4 p-4 border rounded bg-white shadow-sm">
-                            <h5 th:text="${(iter.index + 1) + '. ' + question.title}">Текст вопроса</h5>
+                            <h5>
+                                <span th:text="${(iter.index + 1) + '. ' + question.title}">Текст вопроса</span>
+                                <span th:if="${question.isRequired == 1}" class="text-danger">*</span>
+                            </h5>
                             
                             <!-- Изображение вопроса -->
                             <div th:if="${settingsMap[question.questionId] != null and settingsMap[question.questionId].imagePath != null}">
