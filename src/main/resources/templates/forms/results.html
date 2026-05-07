@@ -68,13 +68,35 @@
                 <canvas th:id="'chart-' + ${question.questionId}" style="max-height: 250px;"></canvas>
             </div>
 
-            <!-- For Text Questions -->
-            <div th:if="${question.questionType == 'TEXT' || question.questionType == 'PARAGRAPH'}">
+            <!-- For Grid Question -->
+            <div th:if="${question.questionType == 'GRID'}" class="table-responsive">
+                <table class="table table-bordered table-sm text-center">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th th:each="col : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '|')}" th:text="${col.trim()}">Колонка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="rowName : ${#strings.arraySplit(settingsMap[question.questionId].gridRowsText, '|')}">
+                            <td class="text-start fw-bold" th:text="${rowName.trim()}">Строка</td>
+                            <td th:each="colName : ${#strings.arraySplit(settingsMap[question.questionId].gridColumnsText, '|')}" 
+                                th:text="${gridStats.get(question.questionId).get(rowName.trim()).get(colName.trim())}">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- For Text/Other Questions -->
+            <div th:if="${question.questionType != 'MULTIPLE_CHOICE' && question.questionType != 'CHECKBOX' && question.questionType != 'DROPDOWN' && question.questionType != 'SCALE' && question.questionType != 'GRID'}">
                 <p class="text-muted small">Список ответов:</p>
-                <ul class="list-group list-group-flush" style="max-height: 200px; overflow-y: auto;">
-                    <li class="list-group-item py-1" th:each="answer : ${textAnswers.get(question.questionId)}" th:text="${answer}">Ответ</li>
-                    <li class="list-group-item text-muted" th:if="${textAnswers.get(question.questionId) == null || textAnswers.get(question.questionId).isEmpty()}">Нет ответов</li>
-                </ul>
+                <div class="border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
+                    <div th:each="answer, aIter : ${textAnswers.get(question.questionId)}">
+                        <div class="py-2" th:text="${answer}">Ответ</div>
+                        <hr th:if="${!aIter.last}" class="my-1 text-muted opacity-25">
+                    </div>
+                    <div class="text-muted" th:if="${textAnswers.get(question.questionId) == null || textAnswers.get(question.questionId).isEmpty()}">Нет ответов</div>
+                </div>
             </div>
         </div>
     </div>

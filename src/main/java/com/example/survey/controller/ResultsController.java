@@ -49,6 +49,8 @@ public class ResultsController {
         // Prepare statistics
         Map<Integer, Map<String, Long>> stats = new java.util.HashMap<>();
         Map<Integer, List<String>> textAnswers = new java.util.HashMap<>();
+        Map<Integer, Map<String, Map<String, Long>>> gridStats = new java.util.HashMap<>();
+        Map<Integer, QuestionSetting> settingsMap = new java.util.HashMap<>();
         
         for (Question q : questions) {
             List<Answer> allAnswers = responses.stream()
@@ -56,6 +58,8 @@ public class ResultsController {
                 .filter(a -> a.getQuestionId().equals(q.getQuestionId()))
                 .collect(Collectors.toList());
             
+            questionService.getQuestionSettings(q.getQuestionId()).ifPresent(s -> settingsMap.put(q.getQuestionId(), s));
+
             if (q.getQuestionType().equals("MULTIPLE_CHOICE") || q.getQuestionType().equals("CHECKBOX") || q.getQuestionType().equals("DROPDOWN")) {
                 List<Option> options = questionService.getOptionsByQuestion(q.getQuestionId());
                 Map<Integer, String> optionMap = options.stream().collect(Collectors.toMap(Option::getOptionId, Option::getOptionText));
@@ -69,11 +73,56 @@ public class ResultsController {
                 }
                 stats.put(q.getQuestionId(), optionCounts);
             } else if (q.getQuestionType().equals("SCALE")) {
-                Map<String, Long> scaleCounts = allAnswers.stream()
-                    .filter(a -> a.getAnswerText() != null)
-                    .collect(Collectors.groupingBy(Answer::getAnswerText, Collectors.counting()));
+                QuestionSetting s = settingsMap.get(q.getQuestionId());
+                int min = (s != null && s.getScaleMin() != null) ? s.getScaleMin() : 1;
+                int max = (s != null && s.getScaleMax() != null) ? s.getScaleMax() : 5;
+                
+                Map<String, Long> scaleCounts = new java.util.TreeMap<>((a, b) -> Integer.compare(Integer.parseInt(a), Integer.parseInt(b)));
+                for (int i = min; i <= max; i++) {
+                    scaleCounts.put(String.valueOf(i), 0L);
+                }
+
+                for (Answer a : allAnswers) {
+                    String val = null;
+                    if (a.getAnswerText() != null) val = a.getAnswerText();
+                    else if (a.getOptionId() != null) val = String.valueOf(a.getOptionId());
+                    
+                    if (val != null && scaleCounts.containsKey(val)) {
+                        scaleCounts.put(val, scaleCounts.get(val) + 1);
+                    }
+                }
                 stats.put(q.getQuestionId(), scaleCounts);
-            } else if (q.getQuestionType().equals("TEXT") || q.getQuestionType().equals("PARAGRAPH")) {
+            } else if (q.getQuestionType().equals("GRID")) {
+                QuestionSetting s = settingsMap.get(q.getQuestionId());
+                if (s != null && s.getGridRowsText() != null && s.getGridColumnsText() != null) {
+                    String[] rows = s.getGridRowsText().split("\\|");
+                    String[] cols = s.getGridColumnsText().split("\\|");
+                    
+                    Map<String, Map<String, Long>> rowStats = new java.util.HashMap<>();
+                    for (String row : rows) {
+                        Map<String, Long> colCounts = new java.util.HashMap<>();
+                        for (String col : cols) colCounts.put(col.trim(), 0L);
+                        rowStats.put(row.trim(), colCounts);
+                    }
+
+                    for (Answer a : allAnswers) {
+                        if (a.getAnswerText() != null && a.getAnswerText().startsWith("row_")) {
+                            try {
+                                String[] parts = a.getAnswerText().split(":");
+                                int rIdx = Integer.parseInt(parts[0].substring(4));
+                                int cIdx = Integer.parseInt(parts[1]);
+                                if (rIdx < rows.length && cIdx < cols.length) {
+                                    String rowName = rows[rIdx].trim();
+                                    String colName = cols[cIdx].trim();
+                                    Map<String, Long> colCounts = rowStats.get(rowName);
+                                    colCounts.put(colName, colCounts.get(colName) + 1);
+                                }
+                            } catch (Exception e) {}
+                        }
+                    }
+                    gridStats.put(q.getQuestionId(), rowStats);
+                }
+            } else {
                 List<String> answers = allAnswers.stream()
                     .map(Answer::getAnswerText)
                     .filter(t -> t != null && !t.isEmpty())
@@ -84,6 +133,8 @@ public class ResultsController {
         
         model.addAttribute("stats", stats);
         model.addAttribute("textAnswers", textAnswers);
+        model.addAttribute("gridStats", gridStats);
+        model.addAttribute("settingsMap", settingsMap);
         
         return "forms/results";
     }
