@@ -45,10 +45,14 @@ public class TxtReportGenerator implements ReportGenerator {
                             if (q.getQuestionType().equals("SCALE")) {
                                 return a.getAnswerText() != null ? a.getAnswerText() : String.valueOf(a.getOptionId());
                             }
-                            if (a.getOptionId() != null) {
-                                return questionService.getOptionsByQuestion(q.getQuestionId()).stream()
-                                    .filter(o -> o.getOptionId().equals(a.getOptionId()))
-                                    .map(Option::getOptionText).findFirst().orElse("ID:" + a.getOptionId());
+                            if (q.getQuestionType().equals("MULTIPLE_CHOICE") || 
+                                q.getQuestionType().equals("CHECKBOX") || 
+                                q.getQuestionType().equals("DROPDOWN")) {
+                                if (a.getOptionId() != null) {
+                                    return questionService.getOptionsByQuestion(q.getQuestionId()).stream()
+                                        .filter(o -> o.getOptionId().equals(a.getOptionId()))
+                                        .map(Option::getOptionText).findFirst().orElse("ID:" + a.getOptionId());
+                                }
                             }
                             return a.getAnswerText();
                         })

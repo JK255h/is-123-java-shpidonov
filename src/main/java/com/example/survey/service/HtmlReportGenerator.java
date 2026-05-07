@@ -52,10 +52,14 @@ public class HtmlReportGenerator implements ReportGenerator {
                             if (currentQ.getQuestionType().equals("SCALE")) {
                                 return a.getAnswerText() != null ? a.getAnswerText() : String.valueOf(a.getOptionId());
                             }
-                            if (a.getOptionId() != null) {
-                                return questionService.getOptionsByQuestion(currentQ.getQuestionId()).stream()
-                                    .filter(o -> o.getOptionId().equals(a.getOptionId()))
-                                    .map(Option::getOptionText).findFirst().orElse("ID:" + a.getOptionId());
+                            if (currentQ.getQuestionType().equals("MULTIPLE_CHOICE") || 
+                                currentQ.getQuestionType().equals("CHECKBOX") || 
+                                currentQ.getQuestionType().equals("DROPDOWN")) {
+                                if (a.getOptionId() != null) {
+                                    return questionService.getOptionsByQuestion(currentQ.getQuestionId()).stream()
+                                        .filter(o -> o.getOptionId().equals(a.getOptionId()))
+                                        .map(Option::getOptionText).findFirst().orElse("ID:" + a.getOptionId());
+                                }
                             }
                             return a.getAnswerText();
                         })
